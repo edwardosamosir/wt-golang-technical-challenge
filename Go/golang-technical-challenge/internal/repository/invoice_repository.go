@@ -1,0 +1,77 @@
+package repository
+
+import (
+	"golang-technical-challenge/internal/entity"
+
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
+type InvoiceRepository struct {
+	Repository[entity.Invoice]
+	Log *logrus.Logger
+}
+
+func NewInvoiceRepository(log *logrus.Logger) *InvoiceRepository {
+	return &InvoiceRepository{
+		Log: log,
+	}
+}
+
+func (r *InvoiceRepository) FindByInvoiceNo(db *gorm.DB, invoice *entity.Invoice, invoiceNo string) error {
+	return db.Preload("Products").
+		Where("invoice_no = ?", invoiceNo).
+		Take(invoice).Error
+}
+
+func (r *InvoiceRepository) FindInvoicesByDate(db *gorm.DB, date string, limit, offset int) ([]entity.Invoice, int64, error) {
+	var invoices []entity.Invoice
+	var total int64
+
+	if err := db.Model(&entity.Invoice{}).
+		Where("date = ?", date).
+		Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := db.Preload("Products").
+		Where("date = ?", date).
+		Limit(limit).
+		Offset(offset).
+		Order("created_at DESC").
+		Find(&invoices).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return invoices, total, nil
+}
+
+func (r *InvoiceRepository) GetSummaryByDate(db *gorm.DB, date string) (totalProfit, totalCash string, err error) {
+	type result struct {
+		TotalProfit string
+		TotalCash   string
+	}
+
+	var res result
+	query := `
+		SELECT 
+			COALESCE(SUM((p.total_price - p.total_cost) * p.quantity), 0)::text AS total_profit,
+			COALESCE(SUM(
+				CASE 
+					WHEN i.payment_type = 'CASH' 
+					THEN (p.total_price * p.quantity) 
+					ELSE 0 
+				END
+			), 0)::text AS total_cash
+
+		FROM products p
+		JOIN invoices i ON i.invoice_no = p.invoice_no
+		WHERE i.date = ?
+	`
+
+	if err := db.Raw(query, date).Scan(&res).Error; err != nil {
+		return "0", "0", err
+	}
+
+	return res.TotalProfit, res.TotalCash, nil
+}
