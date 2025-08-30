@@ -1,3 +1,32 @@
+/*
+	Using your preferred programming language, develop the most efficient function that returns a
+	list of all possible combinations of non-repeating digit (1-9) given variable l and t. l is the length
+	of a combination and t is the total of all numbers in the combination.
+
+	Rules:
+	- Digit ranges from 1 to 9
+	- A digit can only be used once
+	- Combination must not appear twice. Example: [1,2,3] is the same with [3,2,1] so only one of
+	them should be in the list.
+
+	Example 1:
+	Input: l= 3, t = 6
+	Output: [[1,2,3]]
+	Explanation:
+	1 + 2 + 3 = 6
+
+	Example 2:
+	Input: l = 3, t = 8
+	Output: [[1,2,5], [1,3,4]]
+	Explanation:
+	1 + 2 + 5 = 8 ,1 + 3 + 4 = 8
+
+	Example 3:
+	Input: l = 4, t = 5
+	Output: []
+	Explanation: no combination
+*/
+
 function combinationSum(l, t) {
   const result = [];
   const path = [];
