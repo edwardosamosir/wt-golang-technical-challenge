@@ -46,7 +46,19 @@ DB_POOL_LIFETIME=300
 
 ---
 
-### 3️⃣ Run Database Migrations
+### 3️⃣ Install Go Dependencies
+
+Ensure you’re inside the project root directory, then run:
+
+```bash
+go mod tidy
+```
+
+This will download and install all required dependencies listed in go.mod.
+
+---
+
+### 4️⃣ Run Database Migrations
 
 Install `golang-migrate` if you haven’t:
 
