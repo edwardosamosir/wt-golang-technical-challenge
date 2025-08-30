@@ -45,3 +45,8 @@ type UpdateInvoiceRequest struct {
 type DeleteInvoiceRequest struct {
 	InvoiceNo string `json:"-" validate:"required"`
 }
+
+type ImportError struct {
+	InvoiceNo string `json:"invoice_no"`
+	Message   string `json:"message"`
+}
