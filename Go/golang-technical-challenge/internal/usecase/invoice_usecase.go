@@ -48,13 +48,13 @@ func (c *InvoiceUseCase) GetInvoices(ctx context.Context, date string, page, siz
 
 	invoices, totalItems, err := c.InvoiceRepository.FindInvoicesByDate(tx, date, size, offset)
 	if err != nil {
-		c.Log.WithError(err).Error("Failed to fetch invoices")
+		c.Log.WithError(err).WithField("date", date).Error("Failed to fetch invoices")
 		return nil, fiber.ErrInternalServerError
 	}
 
 	totalProfit, totalCash, err := c.InvoiceRepository.GetSummaryByDate(tx, date)
 	if err != nil {
-		c.Log.WithError(err).Error("Failed to calculate summary")
+		c.Log.WithError(err).WithField("date", date).Error("Failed to calculate invoice summary")
 		return nil, fiber.ErrInternalServerError
 	}
 
@@ -76,7 +76,7 @@ func (c *InvoiceUseCase) GetInvoices(ctx context.Context, date string, page, siz
 
 func (c *InvoiceUseCase) Create(ctx context.Context, request *model.CreateInvoiceRequest) (*model.InvoiceResponse, error) {
 	if err := c.Validate.Struct(request); err != nil {
-		c.Log.WithError(err).Error("Error validating request body")
+		c.Log.WithError(err).Warn("Invalid create invoice payload")
 		return nil, fiber.ErrBadRequest
 	}
 
@@ -85,7 +85,7 @@ func (c *InvoiceUseCase) Create(ctx context.Context, request *model.CreateInvoic
 
 	date, err := time.Parse("2006-01-02", request.Date)
 	if err != nil {
-		c.Log.WithError(err).Error("Invalid date format")
+		c.Log.WithError(err).Warn("Invalid date format for create invoice")
 		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid date format, use YYYY-MM-DD")
 	}
 
@@ -94,7 +94,7 @@ func (c *InvoiceUseCase) Create(ctx context.Context, request *model.CreateInvoic
 		c.Log.WithField("invoice_no", request.InvoiceNo).Warn("Invoice already exists")
 		return nil, fiber.NewError(fiber.StatusConflict, "Invoice already exists")
 	} else if err != gorm.ErrRecordNotFound {
-		c.Log.WithError(err).Error("Error checking existing invoice")
+		c.Log.WithError(err).WithField("invoice_no", request.InvoiceNo).Error("Failed to check existing invoice")
 		return nil, fiber.ErrInternalServerError
 	}
 
@@ -124,12 +124,12 @@ func (c *InvoiceUseCase) Create(ctx context.Context, request *model.CreateInvoic
 	invoice.Products = products
 
 	if err := c.InvoiceRepository.Create(tx, invoice); err != nil {
-		c.Log.WithError(err).Error("Error creating invoice")
+		c.Log.WithError(err).WithField("invoice_no", invoice.InvoiceNo).Error("Failed to create invoice")
 		return nil, fiber.ErrInternalServerError
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		c.Log.WithError(err).Error("Error committing transaction")
+		c.Log.WithError(err).WithField("invoice_no", invoice.InvoiceNo).Error("Failed to commit invoice creation")
 		return nil, fiber.ErrInternalServerError
 	}
 
@@ -138,7 +138,7 @@ func (c *InvoiceUseCase) Create(ctx context.Context, request *model.CreateInvoic
 
 func (c *InvoiceUseCase) Update(ctx context.Context, invoiceNo string, request *model.UpdateInvoiceRequest) (*model.InvoiceResponse, error) {
 	if err := c.Validate.Struct(request); err != nil {
-		c.Log.WithError(err).Error("Error validating request body")
+		c.Log.WithError(err).WithField("invoice_no", invoiceNo).Warn("Invalid update invoice payload")
 		return nil, fiber.ErrBadRequest
 	}
 
@@ -151,13 +151,13 @@ func (c *InvoiceUseCase) Update(ctx context.Context, invoiceNo string, request *
 			c.Log.WithField("invoice_no", invoiceNo).Warn("Invoice not found")
 			return nil, fiber.ErrNotFound
 		}
-		c.Log.WithError(err).Error("Error fetching invoice")
+		c.Log.WithError(err).WithField("invoice_no", invoiceNo).Error("Failed to fetch invoice for update")
 		return nil, fiber.ErrInternalServerError
 	}
 
 	date, err := time.Parse("2006-01-02", request.Date)
 	if err != nil {
-		c.Log.WithError(err).Error("Invalid date format")
+		c.Log.WithError(err).WithField("invoice_no", invoiceNo).Warn("Invalid date format for update invoice")
 		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid date format, use YYYY-MM-DD")
 	}
 
@@ -169,7 +169,7 @@ func (c *InvoiceUseCase) Update(ctx context.Context, invoiceNo string, request *
 	invoice.UpdatedAt = time.Now()
 
 	if err := tx.Where("invoice_no = ?", invoice.InvoiceNo).Delete(&entity.Product{}).Error; err != nil {
-		c.Log.WithError(err).Error("Error deleting old products")
+		c.Log.WithError(err).WithField("invoice_no", invoice.InvoiceNo).Error("Failed to delete old products before update")
 		return nil, fiber.ErrInternalServerError
 	}
 
@@ -188,12 +188,12 @@ func (c *InvoiceUseCase) Update(ctx context.Context, invoiceNo string, request *
 	invoice.Products = newProducts
 
 	if err := tx.Save(invoice).Error; err != nil {
-		c.Log.WithError(err).Error("Error updating invoice")
+		c.Log.WithError(err).WithField("invoice_no", invoice.InvoiceNo).Error("Failed to update invoice")
 		return nil, fiber.ErrInternalServerError
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		c.Log.WithError(err).Error("Error committing transaction")
+		c.Log.WithError(err).WithField("invoice_no", invoice.InvoiceNo).Error("Failed to commit invoice update")
 		return nil, fiber.ErrInternalServerError
 	}
 
@@ -202,7 +202,7 @@ func (c *InvoiceUseCase) Update(ctx context.Context, invoiceNo string, request *
 
 func (c *InvoiceUseCase) Delete(ctx context.Context, request *model.DeleteInvoiceRequest) error {
 	if err := c.Validate.Struct(request); err != nil {
-		c.Log.WithError(err).Error("Error validating request body")
+		c.Log.WithError(err).WithField("invoice_no", request.InvoiceNo).Warn("Invalid delete invoice payload")
 		return fiber.ErrBadRequest
 	}
 
@@ -215,17 +215,17 @@ func (c *InvoiceUseCase) Delete(ctx context.Context, request *model.DeleteInvoic
 			c.Log.WithField("invoice_no", request.InvoiceNo).Warn("Invoice not found")
 			return fiber.ErrNotFound
 		}
-		c.Log.WithError(err).Error("Error fetching invoice from DB")
+		c.Log.WithError(err).WithField("invoice_no", request.InvoiceNo).Warn("Invalid delete invoice payload")
 		return fiber.ErrInternalServerError
 	}
 
 	if err := c.InvoiceRepository.Delete(tx, invoice); err != nil {
-		c.Log.WithError(err).Error("Error deleting invoice")
+		c.Log.WithError(err).WithField("invoice_no", request.InvoiceNo).Error("Failed to delete invoice")
 		return fiber.ErrInternalServerError
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		c.Log.WithError(err).Error("Error deleting invoice")
+		c.Log.WithError(err).WithField("invoice_no", request.InvoiceNo).Error("Failed to commit invoice deletion")
 		return fiber.ErrInternalServerError
 	}
 

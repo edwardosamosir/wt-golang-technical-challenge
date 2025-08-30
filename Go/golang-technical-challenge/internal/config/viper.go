@@ -13,7 +13,7 @@ func NewViper() *viper.Viper {
 
 	rootPath, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("Gagal mendapatkan working directory: %v", err)
+		log.Fatalf("Failed to get current working directory: %v", err)
 	}
 
 	if filepath.Base(rootPath) == "web" {
@@ -24,7 +24,7 @@ func NewViper() *viper.Viper {
 	v.SetConfigFile(envPath)
 
 	if err := v.ReadInConfig(); err != nil {
-		log.Fatalf("Gagal membaca file .env di %s: %v", envPath, err)
+		log.Fatalf("Failed to read configuration file at %s: %v", envPath, err)
 	}
 
 	log.Printf("Loaded configuration from: %s", v.ConfigFileUsed())
