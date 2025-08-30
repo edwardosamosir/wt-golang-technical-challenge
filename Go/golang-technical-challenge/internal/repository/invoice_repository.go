@@ -24,19 +24,39 @@ func (r *InvoiceRepository) FindByInvoiceNo(db *gorm.DB, invoice *entity.Invoice
 		Take(invoice).Error
 }
 
+func (r *InvoiceRepository) FindInvoicesByNumbers(db *gorm.DB, invoiceNos []string) ([]entity.Invoice, error) {
+	if len(invoiceNos) == 0 {
+		return []entity.Invoice{}, nil
+	}
+
+	var invoices []entity.Invoice
+	if err := db.Preload("Products").
+		Where("invoice_no IN ?", invoiceNos).
+		Order("date DESC, created_at DESC").
+		Find(&invoices).Error; err != nil {
+		r.Log.WithError(err).
+			WithField("invoice_nos", invoiceNos).
+			Error("Failed to find invoices by invoice numbers")
+		return nil, err
+	}
+
+	return invoices, nil
+}
+
 func (r *InvoiceRepository) FindInvoicesByDate(db *gorm.DB, date string, limit, offset int) ([]entity.Invoice, int64, error) {
 	var invoices []entity.Invoice
 	var total int64
 
-	if err := db.Model(&entity.Invoice{}).
-		Where("date = ?", date).
-		Count(&total).Error; err != nil {
-		r.Log.WithError(err).WithField("date", date).Error("Failed to count total invoices by date")
+	query := db.Where("date = ?", date)
+
+	if err := query.Model(&entity.Invoice{}).Count(&total).Error; err != nil {
+		r.Log.WithError(err).
+			WithField("date", date).
+			Error("Failed to count total invoices by date")
 		return nil, 0, err
 	}
 
-	if err := db.Preload("Products").
-		Where("date = ?", date).
+	if err := query.Preload("Products").
 		Limit(limit).
 		Offset(offset).
 		Order("created_at DESC").

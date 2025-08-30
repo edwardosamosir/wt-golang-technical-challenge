@@ -20,6 +20,28 @@ func NewInvoiceController(useCase *usecase.InvoiceUseCase, log *logrus.Logger) *
 	}
 }
 
+func (c *InvoiceController) Import(ctx *fiber.Ctx) error {
+	fileHeader, err := ctx.FormFile("file")
+	if err != nil {
+		c.Log.WithError(err).Error("Failed to retrieve file from form-data")
+		return fiber.NewError(fiber.StatusBadRequest, "File is required")
+	}
+
+	results, err := c.UseCase.ImportInvoices(ctx.UserContext(), fileHeader)
+	if err != nil {
+		c.Log.WithError(err).Error("Failed to process invoice import")
+		return fiber.ErrInternalServerError
+	}
+
+	// Handle import errors
+	if errs, ok := results.([]model.ImportError); ok {
+		return ctx.JSON(model.WebResponse[[]model.ImportError]{Data: errs})
+	}
+
+	// Success response
+	return ctx.JSON(model.WebResponse[any]{Data: results})
+}
+
 func (c *InvoiceController) GetInvoices(ctx *fiber.Ctx) error {
 	date := ctx.Query("date")
 	page := ctx.QueryInt("page", 1)
