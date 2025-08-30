@@ -1,0 +1,163 @@
+{
+	"info": {
+		"_postman_id": "f6937338-395c-4de2-89f9-0dd88099185f",
+		"name": "Invoice Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22425149"
+	},
+	"item": [
+		{
+			"name": "Delete Invoice",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/invoices/INV-1005",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"invoices",
+						"INV-1005"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Invoice",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"invoice_no\": \"INV-1005\",\n  \"date\": \"2025-08-27\",\n  \"customer_name\": \"Edwardo Samosir\",\n  \"salesperson_name\": \"Andi Wijaya\",\n  \"payment_type\": \"CASH\",\n  \"products\": [\n    {\n      \"item_name\": \"iPhone 15 Pro\",\n      \"quantity\": 2,\n      \"total_cost\": 25000000,\n      \"total_price\": 30000000\n    },\n    {\n      \"item_name\": \"MacBook Pro M3\",\n      \"quantity\": 1,\n      \"total_cost\": 35000000,\n      \"total_price\": 42000000\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/invoices",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"invoices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Import Invoices",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/edwardosamosir/SWE/wida-tech/2. InvoiceImport perfect data.xlsx"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/api/invoices/import",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"invoices",
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Invoice",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"date\": \"2025-08-30\",\n  \"customer_name\": \"Edwardo S\",\n  \"salesperson_name\": \"Budi Santoso\",\n  \"payment_type\": \"CREDIT\",\n  \"notes\": \"Updated order\",\n  \"products\": [\n    {\n      \"item_name\": \"MacBook Pro M3 Max\",\n      \"quantity\": 10,\n      \"total_cost\": 40000000,\n      \"total_price\": 45000000\n    },\n    {\n      \"item_name\": \"iPad Pro 13 M4\",\n      \"quantity\": 2,\n      \"total_cost\": 30000000,\n      \"total_price\": 35000000\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/invoices/INV-1005",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"invoices",
+						"INV-1005"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Invoices",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"date\": \"2025-08-30\",\n  \"customer_name\": \"Edward Samosir Updated\",\n  \"salesperson_name\": \"Budi Santoso\",\n  \"payment_type\": \"CREDIT\",\n  \"notes\": \"Updated order\",\n  \"products\": [\n    {\n      \"item_name\": \"MacBook Pro M3 Max\",\n      \"quantity\": 1,\n      \"total_cost\": 40000000,\n      \"total_price\": 45000000\n    },\n    {\n      \"item_name\": \"iPad Pro 13 M4\",\n      \"quantity\": 2,\n      \"total_cost\": 30000000,\n      \"total_price\": 35000000\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/invoices?date=2025-08-25&page=1&size=5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"invoices"
+					],
+					"query": [
+						{
+							"key": "date",
+							"value": "2025-08-25"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "size",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
