@@ -15,7 +15,7 @@ func InvoiceToResponse(invoice *entity.Invoice) *model.InvoiceResponse {
 		Notes:           invoice.Notes,
 		CreatedAt:       invoice.CreatedAt.Unix(),
 		UpdatedAt:       invoice.UpdatedAt.Unix(),
-		Products:        ProductsToResponseList(invoice.Products), // Panggil converter Product
+		Products:        ProductsToResponseList(invoice.Products),
 	}
 }
 

@@ -27,6 +27,7 @@ func (c *InvoiceController) GetInvoices(ctx *fiber.Ctx) error {
 
 	response, err := c.UseCase.GetInvoices(ctx.UserContext(), date, page, size)
 	if err != nil {
+		c.Log.WithError(err).Error("Failed to get invoices")
 		return err
 	}
 
@@ -39,12 +40,13 @@ func (c *InvoiceController) Create(ctx *fiber.Ctx) error {
 	request := new(model.CreateInvoiceRequest)
 
 	if err := ctx.BodyParser(request); err != nil {
-		c.Log.WithError(err).Error("Failed to parse request body")
+		c.Log.WithError(err).Warn("Invalid JSON format for create invoice")
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request payload")
 	}
 
 	response, err := c.UseCase.Create(ctx.UserContext(), request)
 	if err != nil {
+		c.Log.WithError(err).Error("Failed to create invoice")
 		return err
 	}
 
@@ -58,12 +60,13 @@ func (c *InvoiceController) Update(ctx *fiber.Ctx) error {
 
 	request := new(model.UpdateInvoiceRequest)
 	if err := ctx.BodyParser(request); err != nil {
-		c.Log.WithError(err).Error("Failed to parse request body")
+		c.Log.WithError(err).Warn("Invalid JSON format for update invoice")
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request payload")
 	}
 
 	response, err := c.UseCase.Update(ctx.UserContext(), invoiceNo, request)
 	if err != nil {
+		c.Log.WithError(err).WithField("invoice_no", invoiceNo).Error("Failed to update invoice")
 		return err
 	}
 
@@ -80,7 +83,7 @@ func (c *InvoiceController) Delete(ctx *fiber.Ctx) error {
 	}
 
 	if err := c.UseCase.Delete(ctx.UserContext(), request); err != nil {
-		c.Log.WithError(err).Error("error deleting invoice")
+		c.Log.WithError(err).WithField("invoice_no", invoiceNo).Error("Failed to delete invoice")
 		return err
 	}
 

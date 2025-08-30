@@ -31,6 +31,7 @@ func (r *InvoiceRepository) FindInvoicesByDate(db *gorm.DB, date string, limit, 
 	if err := db.Model(&entity.Invoice{}).
 		Where("date = ?", date).
 		Count(&total).Error; err != nil {
+		r.Log.WithError(err).WithField("date", date).Error("Failed to count total invoices by date")
 		return nil, 0, err
 	}
 
@@ -40,6 +41,13 @@ func (r *InvoiceRepository) FindInvoicesByDate(db *gorm.DB, date string, limit, 
 		Offset(offset).
 		Order("created_at DESC").
 		Find(&invoices).Error; err != nil {
+		r.Log.WithError(err).
+			WithFields(logrus.Fields{
+				"date":   date,
+				"limit":  limit,
+				"offset": offset,
+			}).
+			Error("Failed to find invoices by date")
 		return nil, 0, err
 	}
 
@@ -70,6 +78,7 @@ func (r *InvoiceRepository) GetSummaryByDate(db *gorm.DB, date string) (totalPro
 	`
 
 	if err := db.Raw(query, date).Scan(&res).Error; err != nil {
+		r.Log.WithError(err).WithField("date", date).Error("Failed to calculate invoice summary")
 		return "0", "0", err
 	}
 
