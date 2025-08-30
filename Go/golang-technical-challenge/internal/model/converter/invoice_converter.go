@@ -13,8 +13,8 @@ func InvoiceToResponse(invoice *entity.Invoice) *model.InvoiceResponse {
 		SalespersonName: invoice.SalespersonName,
 		PaymentType:     invoice.PaymentType,
 		Notes:           invoice.Notes,
-		CreatedAt:       invoice.CreatedAt.Unix(),
-		UpdatedAt:       invoice.UpdatedAt.Unix(),
+		CreatedAt:       invoice.CreatedAt,
+		UpdatedAt:       invoice.UpdatedAt,
 		Products:        ProductsToResponseList(invoice.Products),
 	}
 }

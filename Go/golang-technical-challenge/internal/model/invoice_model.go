@@ -11,8 +11,8 @@ type InvoiceResponse struct {
 	SalespersonName string            `json:"salesperson_name"`
 	PaymentType     string            `json:"payment_type"`
 	Notes           *string           `json:"notes,omitempty"`
-	CreatedAt       int64             `json:"created_at"`
-	UpdatedAt       int64             `json:"updated_at"`
+	CreatedAt       time.Time         `json:"created_at"`
+	UpdatedAt       time.Time         `json:"updated_at"`
 	Products        []ProductResponse `json:"products"`
 }
 

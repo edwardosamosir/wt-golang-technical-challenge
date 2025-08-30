@@ -12,6 +12,8 @@ func ProductToResponse(product *entity.Product) model.ProductResponse {
 		Quantity:   product.Quantity,
 		TotalCost:  product.TotalCost,
 		TotalPrice: product.TotalPrice,
+		CreatedAt:  product.CreatedAt,
+		UpdatedAt:  product.UpdatedAt,
 	}
 }
 

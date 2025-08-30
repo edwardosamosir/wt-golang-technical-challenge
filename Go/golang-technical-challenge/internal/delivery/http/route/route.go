@@ -21,5 +21,4 @@ func (c *RouteConfig) SetupAuthRoute() {
 	c.App.Post("/api/invoices", c.InvoiceController.Create)
 	c.App.Put("/api/invoices/:invoiceNo", c.InvoiceController.Update)
 	c.App.Delete("/api/invoices/:invoiceNo", c.InvoiceController.Delete)
-	c.App.Post("/api/invoices/import", c.InvoiceController.Import)
 }
